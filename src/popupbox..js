@@ -1,23 +1,16 @@
 import React from "react";
 
-
 class Box extends React.Component{
     constructor(props){
         super(props);
 
-        const newDate = new Date();
+        const newDate = Date.parse(new Date());
+        const oldDate = Number(localStorage.getItem("GDPR_lastVisit"));
 
         this.state = {
-            oldYear: localStorage.getItem("newYear"),
-            oldMonth: localStorage.getItem("newMonth"),
-            oldDay: localStorage.getItem("newDay"),
-            oldHour: localStorage.getItem("newHour"),
-            oldMin: localStorage.getItem("newMin"),
-            actualYear: newDate.getFullYear(),
-            actualMonth: newDate.getMonth()+1,
-            actualDay: newDate.getDate(),
-            actualHour: newDate.getHours(),
-            actualMin: newDate.getMinutes(),
+            oldDate: oldDate,
+            newDate: newDate,
+            hours24: 24*60*60*1000,
             createBox: false,
         }
     }
@@ -26,21 +19,15 @@ class Box extends React.Component{
 
         document.querySelector('body').style.overflow = "scroll";
 
-        localStorage.setItem("answer", e.currentTarget.innerText);
+        localStorage.setItem("GDPR_answer", e.currentTarget.innerText);
 
-        localStorage.setItem("newYear", this.state.actualYear);
-        localStorage.setItem("newMonth", this.state.actualMonth);
-        localStorage.setItem("newDay", this.state.actualDay);
-        localStorage.setItem("newHour", this.state.actualHour);
-        localStorage.setItem("newMin", this.state.actualMin);
+        localStorage.setItem("GDPR_lastVisit", this.state.newDate);
+
+        let actualDate = Number(localStorage.getItem("GDPR_lastVisit"));
 
         this.setState({
            createBox: false,
-           oldYear: localStorage.getItem("newYear"),
-           oldMonth: localStorage.getItem("newMonth"),
-           oldDay: localStorage.getItem("newDay"),
-           oldHour: localStorage.getItem("newHour"),
-           oldMin: localStorage.getItem("newMin"),
+           oldDate: actualDate,
         });
     };
 
@@ -83,36 +70,19 @@ class Box extends React.Component{
         let box;
 
 
-        let {oldYear,oldMonth,oldDay,oldHour,oldMin,actualYear,actualMonth,actualDay,actualHour,actualMin,createBox} = this.state;
+        let {oldDate,newDate,hours24,createBox} = this.state;
 
-        console.log(oldYear);
-        console.log(oldMonth);
-        console.log(oldDay);
-        console.log(oldHour);
-        console.log(oldMin);
-        console.log(localStorage.getItem("answer"));
 
-        if( oldYear === null || actualYear - oldYear > 0 ){
+        if( oldDate === null || newDate - oldDate > hours24 ){
             createBox = true;
-        } else if ( actualMonth - oldMonth > 0) {
-            createBox = true;
-        } else if( actualDay - oldDay > 1){
-            createBox = true;
-        } else if (actualDay - oldDay === 1 ){
-            if( actualHour - oldHour > 0){
-                createBox = true;
-            } else if ( actualHour - oldHour === 0 ) {
-                if ( actualMin - oldMin > 0){
-                    createBox = true;
-                }
-            }
         }
 
         if ( createBox === false) {
             box = null;
         } else {
             document.querySelector('body').style.overflow = "hidden";
-            localStorage.clear();
+            localStorage.removeItem("GDPR_answer");
+            localStorage.removeItem("GDPR_lastVisit");
 
             box = <div style={boxStyle}>
                 <h1>GDPR consent</h1>
